@@ -28,43 +28,70 @@ const {
     deleteImage
 } = require("../controllers/settingController");
 
-// Configure multer for file uploads
+/* =========================================
+   MULTER CONFIG
+========================================= */
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads/');
+        cb(null, "uploads/");
     },
     filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
+        const uniqueSuffix =
+            Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(
+            null,
+            file.fieldname +
+                "-" +
+                uniqueSuffix +
+                path.extname(file.originalname)
+        );
+    },
 });
 
 const fileFilter = (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|ico|webp/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const extname = allowedTypes.test(
+        path.extname(file.originalname).toLowerCase()
+    );
     const mimetype = allowedTypes.test(file.mimetype);
 
     if (mimetype && extname) {
         return cb(null, true);
     } else {
-        cb(new Error('Only image files are allowed'));
+        cb(new Error("Only image files are allowed"));
     }
 };
 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-    fileFilter: fileFilter
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    fileFilter: fileFilter,
 });
 
-// All routes are protected (admin only)
-router.get("/", protect, getSettings);
+/* =========================================
+   PUBLIC ROUTE
+========================================= */
+
+// ✅ PUBLIC - Used by Home, Navbar, Login page
+router.get("/", getSettings);
+
+/* =========================================
+   ADMIN PROTECTED ROUTES
+========================================= */
+
+// General update
 router.put("/", protect, updateSettings);
 
-// Image Upload Routes
-router.post("/upload/logo", protect, upload.single('logo'), uploadLogo);
-router.post("/upload/favicon", protect, upload.single('favicon'), uploadFavicon);
-router.post("/upload/team/:memberIndex", protect, upload.single('image'), uploadTeamMemberImage);
+// Image Upload
+router.post("/upload/logo", protect, upload.single("logo"), uploadLogo);
+router.post("/upload/favicon", protect, upload.single("favicon"), uploadFavicon);
+router.post(
+    "/upload/team/:memberIndex",
+    protect,
+    upload.single("image"),
+    uploadTeamMemberImage
+);
 router.delete("/image/:type/:publicId", protect, deleteImage);
 
 // Business Info
@@ -83,7 +110,7 @@ router.put("/social", protect, updateSocialMedia);
 // Business Hours
 router.put("/hours", protect, updateBusinessHours);
 
-// About Content
+// About
 router.put("/about", protect, updateAboutContent);
 router.post("/team", protect, addTeamMember);
 router.put("/team/:index", protect, updateTeamMember);

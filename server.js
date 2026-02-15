@@ -32,9 +32,15 @@ if (!fs.existsSync(uploadDir)) {
    MIDDLEWARE
 ========================== */
 
-// CORS configuration
+// CORS configuration - Updated with your Netlify frontend URL
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:5174'],
+    origin: [
+        'http://localhost:3000', 
+        'http://localhost:5173', 
+        'http://localhost:5174',
+        'https://advaitcollections.netlify.app', // Your Netlify frontend
+        'https://www.advaitcollections.netlify.app' // With www subdomain
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -49,7 +55,7 @@ app.use('/uploads', express.static(uploadDir));
 
 // Request logging middleware
 app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.get('origin') || 'unknown'}`);
     next();
 });
 
@@ -65,6 +71,7 @@ app.get("/", (req, res) => {
         version: "1.0.0",
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development',
+        frontendUrl: "https://advaitcollections.netlify.app",
         apiEndpoints: {
             auth: "/api/auth",
             products: "/api/products",
@@ -80,7 +87,8 @@ app.get("/api/status", (req, res) => {
         success: true,
         message: "API is running",
         timestamp: new Date().toISOString(),
-        database: process.env.MONGO_URI ? "Connected" : "Not Configured"
+        database: process.env.MONGO_URI ? "Connected" : "Not Configured",
+        frontend: "https://advaitcollections.netlify.app"
     });
 });
 
@@ -93,7 +101,7 @@ app.use("/api/products", productRoutes);
 // Sales Routes
 app.use("/api/sales", saleRoutes);
 
-// Settings Routes - FIXED: This was missing in your code
+// Settings Routes
 app.use("/api/settings", settingRoutes);
 
 /* ==========================
@@ -193,6 +201,7 @@ const server = app.listen(PORT, () => {
     console.log(`\n🚀 Advait Collections Server running on port ${PORT}`);
     console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`🔗 API URL: http://localhost:${PORT}`);
+    console.log(`🌐 Frontend URL: https://advaitcollections.netlify.app`);
     console.log(`📚 Available Endpoints:`);
     console.log(`   - Auth: http://localhost:${PORT}/api/auth`);
     console.log(`   - Products: http://localhost:${PORT}/api/products`);

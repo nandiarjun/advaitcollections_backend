@@ -19,6 +19,14 @@ const saleSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    customSellingPrice: {
+        type: Number,
+        default: null
+    },
+    wasCustomPrice: {
+        type: Boolean,
+        default: false
+    },
     totalSaleValue: {
         type: Number,
         required: true
@@ -38,5 +46,9 @@ const saleSchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
+
+// Index for faster queries
+saleSchema.index({ productId: 1, createdAt: -1 });
+saleSchema.index({ createdAt: -1 });
 
 module.exports = mongoose.model("Sale", saleSchema);
